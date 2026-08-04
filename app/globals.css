@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Variables sémantiques des deux régimes visuels (brief §4.2, §4.3).
+ * Le mode Production est le défaut. Tout sous-arbre portant
+ * [data-mode='media'] bascule en mode nuit — la bascule est franche,
+ * pas un dégradé.
+ */
+:root {
+  color-scheme: light;
+  --bg: #fbfaf7; /* --paper */
+  --surface: #ffffff;
+  --fg: #111111; /* --ink */
+  --fg-soft: #5a5a56; /* --ink-soft */
+  --line: #dedbd4; /* --rule */
+  --accent: #e0261f; /* --red, à ajuster sur le logo vectoriel */
+}
+
+[data-mode='media'] {
+  /* Les contrôles natifs (select, date) suivent le régime nuit */
+  color-scheme: dark;
+  --bg: #0b0f14; /* --night */
+  --surface: #161c24; /* --night-soft */
+  --fg: #ffffff;
+  --fg-soft: #98a1ad; /* --night-fg-soft, équivalent nuit de --ink-soft (amendement étape 1) */
+  --line: #2a323c; /* --night-rule */
+  --accent: #ffc400; /* --signal */
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+  }
+
+  /* Focus clavier visible partout (brief §9) */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--fg);
+    color: var(--bg);
+  }
+}
+
+@layer components {
+  /*
+   * <Cote> — annotation de mesure (brief §4.1).
+   * Le trait (pathLength normalisé à 1) se dessine de 0 à 100 % de sa
+   * longueur via stroke-dashoffset, une seule fois, à l'entrée dans le
+   * viewport. Le tiret d'extrémité et la valeur apparaissent en fin de
+   * tracé. Tout l'appareil d'animation est doublement conditionné
+   * (amendement étape 2) :
+   *   — html.js : posé par le script inline du layout avant toute peinture.
+   *     Sans JavaScript, aucune de ces règles ne s'applique : trait et
+   *     valeur sont visibles d'emblée, les cotes portent des données
+   *     réelles et doivent rester lisibles.
+   *   — prefers-reduced-motion: no-preference : en mouvement réduit,
+   *     aucune animation non plus.
+   */
+  .cote-trait {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .js .cote .cote-trait {
+      transition: stroke-dashoffset 1s cubic-bezier(0.22, 1, 0.36, 1) 0.1s;
+    }
+    .js .cote .cote-fin {
+      transition: opacity 0.3s ease 0.9s;
+    }
+    .js .cote[data-drawn='false'] .cote-trait {
+      stroke-dashoffset: 1;
+    }
+    .js .cote[data-drawn='false'] .cote-fin {
+      opacity: 0;
+      transition: none;
+    }
+  }
+}
+
+@layer components {
+  /*
+   * Marqueurs de la carte MapLibre (étape 5). Jamais de transform ici :
+   * MapLibre positionne les marqueurs par transform sur l'élément même,
+   * la surbrillance passe donc par un contour.
+   */
+  .marqueur {
+    padding: 0;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    border-radius: 9999px;
+    cursor: pointer;
+  }
+
+  .marqueur-libre {
+    background-color: theme('colors.libre');
+  }
+
+  .marqueur-occupe {
+    background-color: theme('colors.occupe');
+  }
+
+  .marqueur-surbrillance {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Le siège Numerika : point de référence, pas un panneau. Carré jaune. */
+  .marqueur-siege {
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    background-color: theme('colors.signal');
+  }
+}
+
+@layer utilities {
+  /* Archivo en axe Expanded — lit comme du lettrage d'enseigne */
+  .expanded {
+    font-stretch: 125%;
+  }
+
+  /* Discipline mono (brief §4.4) : cotes, dimensions, trafics, dates,
+     formats, références de panneaux. Nulle part ailleurs.
+     Règle d'unités (amendement étape 2) : .data capitalise les ÉTIQUETTES
+     (zones, « RECTO-VERSO », « BÂCHE TENDUE »…). Les VALEURS MESURÉES ne
+     passent jamais par uppercase — « m » reste « m », M voudrait dire méga.
+     Pour une valeur : font-mono text-data, sans .data. */
+  .data {
+    @apply font-mono text-data uppercase;
+  }
+}
