@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Container } from '@/components/Container'
+import { Photo } from '@/components/Photo'
 import { WhatsAppCTA } from '@/components/WhatsAppCTA'
 import { metiers } from '@/content/metiers'
 import { realisations, realisationsTextes } from '@/content/realisations'
@@ -74,10 +75,25 @@ export default function Realisations({
         )}
 
         {affichees.length > 0 ? (
-          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <div
+            data-revele-groupe
+            className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"
+          >
             {affichees.map((r) => (
-              <article key={r.slug}>
-                <div className="aspect-[4/3] border border-line bg-surface" aria-hidden />
+              <article key={r.slug} className="group">
+                {/* Vignette réelle (étape 15 bis) — la grille est prête à
+                    s'allumer à la bascule de `publiable`. */}
+                {r.images[0] !== undefined ? (
+                  <Photo
+                    cle={r.images[0]}
+                    alt={r.nom[locale]}
+                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    className="aspect-[4/3] overflow-hidden border border-line bg-surface"
+                    classNameImg="h-full w-full object-cover transition-transform duration-[600ms] motion-safe:group-hover:scale-[1.04]"
+                  />
+                ) : (
+                  <div className="aspect-[4/3] border border-line bg-surface" aria-hidden />
+                )}
                 {/* Le nom du client est visible dès la grille (brief §6.5). */}
                 <p className="data mt-4 text-fg-soft">{r.client}</p>
                 <h2 className="mt-2 font-medium">

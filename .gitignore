@@ -1,6 +1,11 @@
 # dependencies
 /node_modules
 
+# sources médias brutes (site WordPress + uploads client) — ~400 Mo,
+# retraitées par scripts/traiter-images.mjs ; seuls les dérivés de
+# public/images et public/videos sont versionnés
+/assets-sources
+
 # next.js
 /.next/
 /out/

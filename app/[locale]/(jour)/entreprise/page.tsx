@@ -47,6 +47,25 @@ export default function Entreprise({ params }: { params: { locale: Locale } }) {
             <p key={paragraphe.fr}>{paragraphe[locale]}</p>
           ))}
         </div>
+
+        {/* Vidéo atelier uploadée par le client (étape 15 bis) : basse
+            définition, donc UNIQUEMENT en petit format dans le récit —
+            jamais en hero. Cadrée petite, elle documente sans exposer sa
+            faiblesse. À remplacer par la 4K dès réception. Le lot ne
+            contient toujours AUCUNE photo d'atelier : les substitutions
+            restent (asset n°1, le manque le plus grave) et aucune photo
+            de réalisation ne sera détournée en fausse photo d'atelier. */}
+        <video
+          className="mt-8 w-full max-w-sm border border-line"
+          src="/videos/atelier.mp4"
+          poster="/videos/atelier-poster.jpg"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-label={locale === 'fr' ? 'L’atelier Numerika en activité' : 'The Numerika workshop at work'}
+        />
       </Container>
 
       {/* Photo de récit — entreprise.photos.recit (null, asset n°1) */}
@@ -59,7 +78,7 @@ export default function Entreprise({ params }: { params: { locale: Locale } }) {
           {entreprise.valeurs.titre[locale]}
         </h2>
         {/* Présentation sobre : pas de cartes à icônes. */}
-        <dl className="mt-8 max-w-3xl">
+        <dl data-revele-groupe className="mt-8 max-w-3xl">
           {entreprise.valeurs.items.map((valeur) => (
             <div
               key={valeur.nom.fr}
@@ -80,7 +99,7 @@ export default function Entreprise({ params }: { params: { locale: Locale } }) {
           <h2 className="expanded font-display text-display-m font-bold">
             {entreprise.equipement.titre[locale]}
           </h2>
-          <dl className="mt-8 max-w-3xl">
+          <dl data-revele-groupe className="mt-8 max-w-3xl">
             {machines.map((machine) => (
               <div
                 key={machine.nom}

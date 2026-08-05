@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Archivo, IBM_Plex_Mono, Instrument_Sans } from 'next/font/google'
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/JsonLd'
+import { Reveles } from '@/components/Reveles'
 import { site } from '@/content/site'
 import { isLocale, locales } from '@/lib/i18n'
 import { jsonOrganisation } from '@/lib/jsonld'
@@ -101,6 +102,8 @@ export default function LocaleLayout({
         />
         {/* Organization + LocalBusiness fusionnés, toutes pages (étape 12). */}
         <JsonLd data={jsonOrganisation()} />
+        {/* Observateur unique des révélations data-revele (passe B). */}
+        <Reveles />
         {/* En-tête et pied de page vivent dans les layouts de régime :
             (jour) pour le mode Production, media pour le mode nuit, afin
             que la bascule couvre tout le viewport (brief §4.2). */}

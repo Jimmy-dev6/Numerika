@@ -77,6 +77,16 @@
     stroke-dashoffset: 0;
   }
 
+  /* Cote posée PAR-DESSUS une photo ou une vidéo (étape 15 bis) : le
+     filet du régime disparaîtrait dans l'image — trait et valeur passent
+     en blanc avec une ombre portée, lisibles sur ciel clair comme sur
+     zone sombre. La mécanique d'animation est inchangée. */
+  .cote-sur-media {
+    --line: rgba(255, 255, 255, 0.92);
+    color: #ffffff;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.85));
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     .js .cote .cote-trait {
       transition: stroke-dashoffset 1s cubic-bezier(0.22, 1, 0.36, 1) 0.1s;
@@ -91,6 +101,47 @@
       opacity: 0;
       transition: none;
     }
+  }
+}
+
+@layer components {
+  /*
+   * Diaporama du hero de l'accueil (étape 15 bis, passe A).
+   * 4 images, fenêtre de 6 s chacune, fondu enchaîné de 1 s, Ken Burns
+   * discret (échelle 1 → 1.06 sur la fenêtre). Cycle de 24 s permis par
+   * des délais négatifs : tous les calques sont en vol dès t=0, le
+   * fondu entrant du suivant recouvre le fondu sortant du courant.
+   *
+   * Même double garde que <Cote> : html.js ET reduced-motion absent.
+   * Sans JavaScript ou en mouvement réduit, seule la première image
+   * (état de base opacity-1, priority) est visible — aucune animation
+   * sur le chemin du LCP : la première image démarre pleine opacité et
+   * ne bouge qu'à partir de t=5 s.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .js .diapo-calque {
+      animation: diapo-fondu 24s linear infinite;
+      animation-delay: calc(var(--i) * 6s - 24s);
+    }
+    .js .diapo-calque img {
+      animation: diapo-zoom 24s linear infinite;
+      animation-delay: calc(var(--i) * 6s - 24s);
+    }
+  }
+
+  @keyframes diapo-fondu {
+    0% { opacity: 1; }
+    20.83% { opacity: 1; } /* pleine jusqu'à 5 s */
+    25% { opacity: 0; } /* sortie fondue 5 s → 6 s */
+    95.83% { opacity: 0; }
+    100% { opacity: 1; } /* entrée fondue 23 s → 24 s */
+  }
+
+  @keyframes diapo-zoom {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.06); }
+    95.83% { transform: scale(1.06); }
+    100% { transform: scale(1); }
   }
 }
 
@@ -126,6 +177,292 @@
     height: 12px;
     border: 2px solid rgba(255, 255, 255, 0.85);
     background-color: theme('colors.signal');
+  }
+}
+
+@layer components {
+  /*
+   * ======= Étape 15 bis, PASSE B — le mouvement =======
+   * Règles du prompt maître : CSS + IntersectionObserver uniquement,
+   * tout gaté html.js ET prefers-reduced-motion, jamais d'animation sur
+   * le chemin du LCP, états initiaux en opacity/transform seulement
+   * (zéro CLS), une seule fois par élément, rien au-delà de 1,5 s.
+   */
+
+  /*
+   * B1 — Révélation. data-revele (bloc seul) et data-revele-groupe
+   * (cascade de 60 ms entre enfants directs, plafonnée à 600 ms par
+   * components/Reveles.tsx qui pose --rd). L'attribut passe à « fait »
+   * à l'entrée dans le viewport et n'en revient jamais.
+   * Filet de sécurité : si l'observateur ne s'exécute pas (JS en échec
+   * après la pose de la classe js), l'animation revele-secours rend
+   * tout visible après 2,5 s — un contenu caché n'est jamais définitif.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .js [data-revele]:not([data-revele='fait']),
+    .js [data-revele-groupe]:not([data-revele-groupe='fait']) > * {
+      opacity: 0;
+      transform: translateY(12px);
+      animation: revele-secours 0.5s cubic-bezier(0.22, 1, 0.36, 1) 2.5s forwards;
+    }
+    .js [data-revele='fait'],
+    .js [data-revele-groupe='fait'] > * {
+      opacity: 1;
+      transform: none;
+      transition:
+        opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--rd, 0s),
+        transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--rd, 0s);
+    }
+  }
+
+  @keyframes revele-secours {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /*
+   * B2 accueil — séquence d'ouverture : les deux lignes du titre se
+   * révèlent à 150 ms d'écart, puis la cote se trace (délais renforcés
+   * via .sequence-hero), pendant que la première image du diaporama
+   * fond depuis 25 % d'opacité. JAMAIS depuis 0 : la première frame
+   * peinte compte pour le LCP, l'entrée ne le retarde pas d'un pixel.
+   * Total < 1,5 s.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .js .hero-ligne {
+      animation: monte-fondu 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+      animation-delay: calc(var(--i) * 150ms);
+    }
+    .js .media-entree {
+      animation: media-entree 0.4s ease-out backwards;
+    }
+    .js .sequence-hero .cote-trait {
+      transition-delay: 0.45s;
+    }
+    .js .sequence-hero .cote-fin {
+      transition-delay: 1.25s;
+    }
+    /* B2 fiche panneau — voir, mesurer, détailler : média en entrée,
+       cotes retardées, tableau en cascade (data-revele-groupe). */
+    .js .sequence-media .cote-trait {
+      transition-delay: 0.45s;
+    }
+    .js .sequence-media .cote-fin {
+      transition-delay: 1.25s;
+    }
+  }
+
+  @keyframes monte-fondu {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+
+  @keyframes media-entree {
+    from {
+      opacity: 0.25;
+    }
+  }
+
+  /*
+   * B2 /media — « la ville s'allume » : un voile noir posé PAR-DESSUS
+   * le hero fond en 1 s. Le poster peint dessous dès la première frame
+   * (l'occlusion n'entre pas dans le LCP). Sans JS ou en mouvement
+   * réduit, le voile reste transparent.
+   */
+  .voile-allumage {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .js .voile-allumage {
+      animation: voile-allumage 1s ease-out forwards;
+    }
+  }
+
+  @keyframes voile-allumage {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  /* B2 inventaire — la barre de sélection monte du bas, amortie, à la
+     première coche (elle n'existe pas avant). Overlay fixe : zéro CLS. */
+  @media (prefers-reduced-motion: no-preference) {
+    .js .barre-entree {
+      animation: barre-entree 0.45s cubic-bezier(0.22, 1.2, 0.36, 1) backwards;
+    }
+  }
+
+  @keyframes barre-entree {
+    from {
+      transform: translateY(105%);
+    }
+  }
+
+  /* B2 fiche pôle — Ken Burns discret sur l'image d'ouverture : zoom
+     1 → 1.04, une seule fois, lent. */
+  @media (prefers-reduced-motion: no-preference) {
+    .js .kenburns img {
+      animation: kenburns 14s ease-out forwards;
+    }
+  }
+
+  @keyframes kenburns {
+    to {
+      transform: scale(1.04);
+    }
+  }
+
+  /*
+   * B3 — marquee des références : la grille des 29 devient deux
+   * bandeaux défilant en sens inverse (~40 s/boucle), pause au survol.
+   * La boucle repose sur des demi-pistes identiques (copies aria-hidden)
+   * et un padding-right constant par item : translateX(-50 %) retombe
+   * exactement sur le début. Sans JS ou en mouvement réduit : grille
+   * statique d'origine, copies masquées.
+   */
+  .marquee-copie {
+    display: none;
+  }
+
+  .marquee-piste {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem 2rem;
+  }
+
+  @media (min-width: 640px) {
+    .marquee-piste {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .marquee-piste {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .js .marquee {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      overflow: hidden;
+    }
+    .js .marquee-piste {
+      display: flex;
+      width: max-content;
+      gap: 0;
+      animation: marquee 40s linear infinite;
+    }
+    .js .marquee-piste > li {
+      padding-right: 2.5rem;
+      white-space: nowrap;
+    }
+    .js .marquee-piste[data-sens='inverse'] {
+      animation-direction: reverse;
+    }
+    .js .marquee:hover .marquee-piste {
+      animation-play-state: paused;
+    }
+    .js .marquee .marquee-copie {
+      display: block;
+    }
+  }
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* B3 — pastille de disponibilité : pulsation lente sur « libre »
+     uniquement, subtile, jamais en mouvement réduit. */
+  @media (prefers-reduced-motion: no-preference) {
+    .js .pastille-libre {
+      animation: pastille-libre 2s ease-in-out infinite;
+    }
+  }
+
+  @keyframes pastille-libre {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.45;
+    }
+  }
+
+  /* B3 — soulignement animé de la navigation. */
+  .lien-nav {
+    position: relative;
+  }
+
+  .lien-nav::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: -3px;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .lien-nav::after {
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+  }
+
+  .lien-nav:hover::after,
+  .lien-nav:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  /* B3 — boutons : translation d'1 px au survol, ombre de focus
+     renforcée. Le transform est gaté mouvement ; le focus reste
+     toujours visible (accessibilité d'abord). */
+  .bouton-vif:focus-visible {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .bouton-vif {
+      transition:
+        transform 0.2s ease,
+        opacity 0.2s ease,
+        border-color 0.2s ease;
+    }
+    .bouton-vif:hover {
+      transform: translateY(-1px);
+    }
+  }
+
+  /* B3 — la cote d'un média survolé se retrace. */
+  @media (prefers-reduced-motion: no-preference) {
+    .js .retrace-survol:hover .cote-trait {
+      animation: cote-retrace 1s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+  }
+
+  @keyframes cote-retrace {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
   }
 }
 

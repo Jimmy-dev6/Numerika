@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { Container } from '@/components/Container'
 import { Cote } from '@/components/Cote'
 import { JsonLd } from '@/components/JsonLd'
+import { Photo } from '@/components/Photo'
 import { metiers } from '@/content/metiers'
 import { realisations, realisationsTextes } from '@/content/realisations'
 import { formatDimensions, formatMetres } from '@/lib/format'
@@ -65,10 +66,53 @@ export default function EtudeDeCas({ params }: { params: { locale: Locale; slug:
           </p>
         </header>
 
-        {/* Le média : bloc de substitution en attendant les photos. Coté
-            quand les dimensions sont connues — jamais inventées. */}
+        {/* Le média (étape 15 bis) : les vraies photos dès qu'elles
+            existent — la première en grand, les suivantes en galerie.
+            Coté quand les dimensions sont connues — jamais inventées.
+            Sans photo : substitution, cotée si possible. */}
         <div className="mt-10">
-          {r.dimensions !== null ? (
+          {r.images[0] !== undefined ? (
+            <>
+              <div className="relative">
+                <Photo
+                  cle={r.images[0]}
+                  alt={r.nom[locale]}
+                  sizes="(min-width: 1280px) 72rem, 100vw"
+                  priorite
+                  className="overflow-hidden border border-line bg-surface"
+                  classNameImg="h-auto w-full"
+                />
+                {r.dimensions !== null && (
+                  <>
+                    <Cote
+                      valeur={formatMetres(r.dimensions.largeurM, locale)}
+                      position="top"
+                      className="cote-sur-media"
+                    />
+                    <Cote
+                      valeur={formatMetres(r.dimensions.hauteurM, locale)}
+                      position="right"
+                      className="cote-sur-media"
+                    />
+                  </>
+                )}
+              </div>
+              {r.images.length > 1 && (
+                <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
+                  {r.images.slice(1).map((cle, i) => (
+                    <Photo
+                      key={cle}
+                      cle={cle}
+                      alt={`${r.nom[locale]} — photo ${i + 2}`}
+                      sizes="(min-width: 640px) 33vw, 50vw"
+                      className="aspect-[4/3] overflow-hidden border border-line bg-surface"
+                      classNameImg="h-full w-full object-cover"
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          ) : r.dimensions !== null ? (
             <div
               className="relative mx-auto w-full border border-line bg-surface"
               style={{

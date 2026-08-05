@@ -1,3 +1,4 @@
+import type { CleImage } from './images.gen'
 import type { Localized } from '@/lib/i18n'
 
 /**
@@ -16,8 +17,13 @@ export type Metier = {
   description: Localized
   /** Complément de la phrase WhatsApp : « Bonjour, j'ai un projet … ». */
   contexteDevis: Localized
-  /** null tant que les photos d'atelier ne sont pas fournies (asset n°1). */
-  image: string | null
+  /** Image d'ouverture et vignette du pôle (étape 15 bis, passe A).
+      RÉGIME PÔLE : une photo de réalisation montre un produit posé dans
+      l'espace public — montrable en contexte pôle dès maintenant, mais
+      SANS attribution tant que la réalisation n'est pas `publiable`
+      (l'image seule, jamais le nom du client). Ne JAMAIS illustrer un
+      pôle avec la photo d'un autre métier. null = substitution conservée. */
+  image: CleImage | null
   produits: Array<{ ancre: string; nom: Localized }>
 }
 
@@ -30,7 +36,7 @@ export const metiers: Metier[] = [
       en: 'Banners, adhesives, vinyl and large-format prints, on flexible or rigid materials, in short or long runs.',
     },
     contexteDevis: { fr: 'en impression numérique', en: 'in digital printing' },
-    image: null,
+    image: 'realisations/bache-lassa',
     produits: [
       { ancre: 'grand-format', nom: { fr: 'Grand format', en: 'Large format' } },
       { ancre: 'baches', nom: { fr: 'Bâches', en: 'Banners' } },
@@ -46,7 +52,8 @@ export const metiers: Metier[] = [
       en: 'Flyers, posters, leaflets and business cards, with paper and finishing matched to how they will be used.',
     },
     contexteDevis: { fr: 'en imprimerie', en: 'in print' },
-    image: null,
+    image: null, // À CONFIRMER : photos atelier imprimerie à demander
+
     produits: [
       { ancre: 'flyers', nom: { fr: 'Flyers', en: 'Flyers' } },
       { ancre: 'affiches', nom: { fr: 'Affiches', en: 'Posters' } },
@@ -63,7 +70,8 @@ export const metiers: Metier[] = [
       en: 'Embroidery, screen printing, transfer and sublimation, on workwear, team clothing and textile materials.',
     },
     contexteDevis: { fr: 'en textile', en: 'in textile' },
-    image: null,
+    image: null, // À CONFIRMER : photos atelier textile à demander
+
     produits: [
       { ancre: 'broderie', nom: { fr: 'Broderie', en: 'Embroidery' } },
       { ancre: 'serigraphie', nom: { fr: 'Sérigraphie', en: 'Screen printing' } },
@@ -81,7 +89,7 @@ export const metiers: Metier[] = [
       en: 'Signs, lettering, totems and neon, made in our workshop and installed on façades and indoors.',
     },
     contexteDevis: { fr: 'en signalétique', en: 'in signage' },
-    image: null,
+    image: 'realisations/neon-madrague',
     produits: [
       { ancre: 'enseignes', nom: { fr: 'Enseignes', en: 'Signs' } },
       { ancre: 'exterieure', nom: { fr: 'Signalétique extérieure', en: 'Exterior signage' } },
@@ -99,7 +107,7 @@ export const metiers: Metier[] = [
       en: 'Corporate gifts, trophies, badges and gift boxes, laser engraved or marked, one-off or in series.',
     },
     contexteDevis: { fr: 'en objets personnalisés', en: 'in personalised objects' },
-    image: null,
+    image: 'realisations/trophee-credit-international',
     produits: [
       { ancre: 'goodies', nom: { fr: 'Goodies', en: 'Corporate gifts' } },
       { ancre: 'trophees', nom: { fr: 'Trophées', en: 'Trophies' } },
@@ -118,7 +126,7 @@ export const metiers: Metier[] = [
       en: 'Wrapping for vans, company fleets and cargo tricycles, cutting and installation included.',
     },
     contexteDevis: { fr: 'en branding de véhicules', en: 'in vehicle branding' },
-    image: null,
+    image: 'realisations/camion-casamancaise',
     produits: [
       { ancre: 'covering', nom: { fr: 'Covering utilitaires', en: 'Van wrapping' } },
       { ancre: 'flottes', nom: { fr: 'Flottes', en: 'Fleets' } },
@@ -135,7 +143,7 @@ export const metiers: Metier[] = [
       en: 'Wood and aluminium joinery, wall cladding and façade treatment, for shops, head offices and construction sites.',
     },
     contexteDevis: { fr: 'en menuiserie ou façade', en: 'in joinery or façade work' },
-    image: null,
+    image: 'realisations/facade-crystal',
     produits: [
       { ancre: 'bois', nom: { fr: 'Menuiserie bois', en: 'Wood joinery' } },
       { ancre: 'aluminium', nom: { fr: 'Menuiserie aluminium', en: 'Aluminium joinery' } },
@@ -151,7 +159,8 @@ export const metiers: Metier[] = [
       en: '3D printing, polystyrene cutting, parametric structures, photo and video studio: the unit for requests outside the catalogue.',
     },
     contexteDevis: { fr: 'en 3D ou projet spécifique', en: 'in 3D or a special project' },
-    image: null,
+    image: null, // À CONFIRMER : photos atelier 3D/projets à demander
+
     produits: [
       { ancre: 'impression-3d', nom: { fr: 'Impression 3D', en: '3D printing' } },
       { ancre: 'polystyrene', nom: { fr: 'Polystyrène', en: 'Polystyrene' } },

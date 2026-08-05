@@ -1,7 +1,35 @@
-/** Textes de l'accueil (brief §6.1, étape 7). */
+import type { CleImage } from './images.gen'
+
+/** Textes de l'accueil (brief §6.1, étape 7 ; images à l'étape 15 bis). */
 export const accueil = {
+  /* Diaporama du hero : 4 images fortes, réelles, sans attribution dans
+     les alt tant que les réalisations ne sont pas publiables (régime
+     pôle). L'ordre est éditorial : lumière, mouvement, échelle, régie. */
+  heroDiaporama: [
+    {
+      cle: 'realisations/enseigne-lumineuse-ecobank',
+      alt: { fr: 'Enseigne lumineuse posée en façade, de nuit', en: 'Illuminated sign installed on a façade at night' },
+    },
+    {
+      cle: 'realisations/camion-casamancaise',
+      alt: { fr: 'Camion habillé en covering total', en: 'Truck in full wrap' },
+    },
+    {
+      cle: 'realisations/facade-crystal',
+      alt: { fr: 'Façade de commerce habillée', en: 'Clad shop façade' },
+    },
+    {
+      cle: 'panneaux/pikine-arene-nationale',
+      alt: { fr: 'Panneau grand format à Pikine, vue aérienne', en: 'Large-format billboard in Pikine, aerial view' },
+    },
+  ] satisfies Array<{ cle: CleImage; alt: { fr: string; en: string } }>,
+
   portes: {
     production: {
+      /* Image de fond de la porte (étape 15 bis) : le camion Numerika —
+         l'atelier qui roule. Texte par-dessus voile sombre. */
+      image: 'realisations/camion-numerika' satisfies CleImage,
+      imageAlt: { fr: 'Camion Numerika en covering', en: 'Numerika truck in full wrap' },
       surtitre: { fr: 'Production', en: 'Production' },
       titre: { fr: 'Ce que l’on fabrique.', en: 'What we make.' },
       phrase: {
@@ -11,6 +39,10 @@ export const accueil = {
       lien: { fr: 'Découvrir les métiers', en: 'Explore our expertise' },
     },
     media: {
+      /* La photo Colobane du lot est une prise de JOUR (vérifiée) : repli
+         prévu par le prompt maître → KRM00176, panneaux du Plateau. */
+      image: 'panneaux/plateau-entree-ville' satisfies CleImage,
+      imageAlt: { fr: 'Panneaux d’affichage au Plateau, Dakar', en: 'Billboards in Plateau, Dakar' },
       surtitre: { fr: 'Numerika Media', en: 'Numerika Media' },
       titre: { fr: 'Où l’on vous voit.', en: 'Where you get seen.' },
       phrase: {

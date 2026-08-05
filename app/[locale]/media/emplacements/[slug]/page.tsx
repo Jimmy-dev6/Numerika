@@ -1,12 +1,15 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { preload } from 'react-dom'
 import { Container } from '@/components/Container'
 import { Cote } from '@/components/Cote'
 import { JsonLd } from '@/components/JsonLd'
 import { BoutonSelection } from '@/components/media/BoutonSelection'
 import { CarteEmplacement } from '@/components/media/CarteEmplacement'
 import { RetourListe } from '@/components/media/RetourListe'
+import { Photo } from '@/components/Photo'
 import { WhatsAppCTA } from '@/components/WhatsAppCTA'
+import { imagesGen } from '@/content/images.gen'
 import { media } from '@/content/media'
 import { disponibilite, panneaux, type Panneau } from '@/content/panneaux'
 import { formatDateCourte, formatDimensions, formatMetres, formatNombre } from '@/lib/format'
@@ -70,30 +73,109 @@ export function generateMetadata({
   }
 }
 
-/** Bloc média : substitution proportionnelle cotée en attendant la vidéo
-    drone et les photos (assets À CONFIRMER). Quand ils arriveront, le
-    média remplacera le contenu du cadre sans changer la structure. */
+/**
+ * Bloc média (étape 15 bis, passe A) : la vidéo drone quand elle existe
+ * (muette, boucle, poster, preload metadata), sinon la photo en grand,
+ * sinon la substitution proportionnelle. Les deux <Cote> annotent
+ * PAR-DESSUS le média dans tous les cas — c'est la signature, elle ne
+ * disparaît pas sous les images. Les valeurs restent les dimensions
+ * réelles du panneau, jamais celles du cadre.
+ */
 function BlocMedia({ panneau, locale }: { panneau: Panneau; locale: Locale }) {
-  const ratio = panneau.largeurM / panneau.hauteurM
+  /* Ratio du cadre : celui du média quand il y en a un (vidéos 16/9,
+     photos à leur ratio intrinsèque lu du manifeste), sinon les
+     proportions réelles du panneau. */
+  const photo = panneau.images[0] ?? null
+  const meta = photo !== null ? imagesGen[photo] : null
+
+  /* Le poster porte le LCP de la fiche : preload en priorité haute —
+     l'attribut poster est découvert trop tard par le scanner sinon. */
+  if (panneau.video !== null) {
+    preload(`/videos/${panneau.video}-poster.jpg`, { as: 'image', fetchPriority: 'high' })
+  }
+  const ratio =
+    panneau.video !== null
+      ? 16 / 9
+      : meta !== null
+        ? meta.largeur / meta.hauteur
+        : panneau.largeurM / panneau.hauteurM
 
   return (
     <div className="px-6 py-6">
       {/* Jamais max-height avec aspect-ratio : la hauteur se clamperait et
           les proportions mentiraient. On borne la largeur pour que la
           hauteur ne dépasse pas ~26rem, le ratio reste exact. */}
+      {/* Passe B — la page raconte : voir (media-entree), mesurer (cotes
+          retardées par .sequence-media), détailler (tableau en cascade).
+          retrace-survol : les cotes se retracent au survol du média. */}
       <div
-        className="relative mx-auto w-full border border-line bg-surface"
+        className="sequence-media retrace-survol relative mx-auto w-full border border-line bg-surface"
         style={{
-          aspectRatio: `${panneau.largeurM} / ${panneau.hauteurM}`,
+          aspectRatio: `${ratio}`,
           maxWidth: `min(100%, calc(26rem * ${ratio}))`,
         }}
       >
-        <Cote valeur={formatMetres(panneau.largeurM, locale)} position="top" />
-        <Cote valeur={formatMetres(panneau.hauteurM, locale)} position="right" />
-        <p className="absolute inset-0 flex items-center justify-center font-mono text-display-m text-fg-soft">
-          {formatDimensions(panneau.largeurM, panneau.hauteurM, locale)}
-        </p>
+        {panneau.video !== null ? (
+          <video
+            className="media-entree absolute inset-0 h-full w-full object-cover"
+            src={`/videos/${panneau.video}.mp4`}
+            poster={`/videos/${panneau.video}-poster.jpg`}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+          />
+        ) : photo !== null ? (
+          <Photo
+            cle={photo}
+            alt={panneau.nom[locale]}
+            sizes="(min-width: 1024px) 60rem, 100vw"
+            priorite
+            className="media-entree absolute inset-0"
+            classNameImg="h-full w-full object-cover"
+          />
+        ) : (
+          <p className="absolute inset-0 flex items-center justify-center font-mono text-display-m text-fg-soft">
+            {formatDimensions(panneau.largeurM, panneau.hauteurM, locale)}
+          </p>
+        )}
+        <Cote
+          valeur={formatMetres(panneau.largeurM, locale)}
+          position="top"
+          className={panneau.video !== null || photo !== null ? 'cote-sur-media' : undefined}
+        />
+        <Cote
+          valeur={formatMetres(panneau.hauteurM, locale)}
+          position="right"
+          className={panneau.video !== null || photo !== null ? 'cote-sur-media' : undefined}
+        />
       </div>
+
+      {/* Galerie : les photos restantes quand il y en a plusieurs. */}
+      <GaleriePhotos panneau={panneau} locale={locale} />
+    </div>
+  )
+}
+
+/** Photos secondaires sous le média principal (la vidéo prime : toutes
+    les photos passent alors en galerie). Rien si zéro ou une seule. */
+function GaleriePhotos({ panneau, locale }: { panneau: Panneau; locale: Locale }) {
+  const photos = panneau.video !== null ? panneau.images : panneau.images.slice(1)
+  if (photos.length === 0) return null
+
+  return (
+    <div data-revele-groupe className="mx-auto mt-4 grid max-w-4xl grid-cols-2 gap-4 sm:grid-cols-3">
+      {photos.map((cle, i) => (
+        <Photo
+          key={cle}
+          cle={cle}
+          alt={`${panneau.nom[locale]} — photo ${i + 1}`}
+          sizes="(min-width: 640px) 33vw, 50vw"
+          className="aspect-[3/2] overflow-hidden border border-line bg-surface"
+          classNameImg="h-full w-full object-cover"
+        />
+      ))}
     </div>
   )
 }
@@ -133,7 +215,7 @@ function FicheEmplacement({ panneau, locale }: { panneau: Panneau; locale: Local
           <p className="mt-4 flex items-center gap-2 font-mono text-data">
             <span
               aria-hidden
-              className={`h-2 w-2 shrink-0 ${dispo === 'libre' ? 'bg-libre' : 'bg-occupe'}`}
+              className={`h-2 w-2 shrink-0 ${dispo === 'libre' ? 'pastille-libre bg-libre' : 'bg-occupe'}`}
             />
             {dispo === 'libre'
               ? media.dispo.libre[locale]
@@ -147,7 +229,7 @@ function FicheEmplacement({ panneau, locale }: { panneau: Panneau; locale: Local
 
       <Container>
         <div className="gap-12 lg:flex lg:items-start">
-          <dl className="lg:flex-1">
+          <dl data-revele-groupe className="lg:flex-1">
             <LigneTechnique
               label={media.fiche.dimensions[locale]}
               valeur={formatDimensions(panneau.largeurM, panneau.hauteurM, locale)}
@@ -195,7 +277,10 @@ function FicheEmplacement({ panneau, locale }: { panneau: Panneau; locale: Local
             <h2 className="expanded font-display text-display-m font-bold">
               {media.fiche.memeZone[locale]}
             </h2>
-            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div
+              data-revele-groupe
+              className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            >
               {memeZone.map((p) => (
                 <CarteEmplacement key={p.slug} panneau={p} locale={locale} maintenant={maintenant} />
               ))}

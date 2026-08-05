@@ -91,8 +91,9 @@ export default function Emplacements({
 
               <div id="liste-emplacements" className="mt-8 lg:order-1 lg:mt-0 lg:flex-1">
                 {affiches.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                    {affiches.map((panneau) => (
+                  /* Cascade des cartes à l'arrivée (passe B). */
+                  <div data-revele-groupe className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    {affiches.map((panneau, index) => (
                       <CarteHoverZone key={panneau.slug} slug={panneau.slug}>
                         <CarteEmplacement
                           panneau={panneau}
@@ -100,6 +101,10 @@ export default function Emplacements({
                           maintenant={maintenant}
                           query={query}
                           niveauTitre="h2"
+                          /* La photo de la première carte porte le LCP
+                             mobile : eager + fetchpriority high, les
+                             autres restent lazy. */
+                          priorite={index === 0}
                         />
                       </CarteHoverZone>
                     ))}

@@ -1,3 +1,4 @@
+import type { CleImage, CleVideo } from './images.gen'
 import type { Localized } from '../lib/i18n'
 
 /**
@@ -49,8 +50,10 @@ export type Panneau = {
   vuesJour: number | null
   coords: { lat: number; lng: number } | null
   mapsUrl: string | null
-  video: string | null
-  images: string[]
+  /** Clé de videosGen : vidéo drone H.264 muette dans public/videos. */
+  video: CleVideo | null
+  /** Clés du manifeste images.gen.ts, la première est la photo principale. */
+  images: CleImage[]
   /** null = libre immédiatement. Sinon date ISO de fin de contrat en cours. */
   libreLe: string | null
 }
@@ -66,9 +69,11 @@ export function disponibilite(p: Panneau, ref: Date = new Date()): Disponibilite
   return new Date(p.libreLe) <= ref ? 'libre' : 'occupe'
 }
 
-/* Champs video, images, mapsUrl, coords : les vidéos drone et liens Maps
-   existent sur le site actuel mais seront vérifiés un par un avant saisie
-   (assets n°4 et 6 du brief). null / [] partout en attendant. À CONFIRMER. */
+/* Photos et vidéos saisies à l'étape 15 bis (passe A) depuis la table de
+   correspondance du prompt maître — fichiers du site actuel vérifiés un
+   par un, retraités par scripts/traiter-images.mjs. Les 3 emplacements
+   Central Équipement restent sans photo (À CONFIRMER : à demander au
+   client). mapsUrl et coords : toujours null, jamais devinés. */
 
 export const panneaux: Panneau[] = [
   /* ——— Emplacements uniques (23), dans l'ordre du tableau §7.3 ——— */
@@ -89,8 +94,8 @@ export const panneaux: Panneau[] = [
     vuesJour: 100_000,
     coords: null,
     mapsUrl: null,
-    video: null,
-    images: [],
+    video: 'almadies-shell-sens-almadies',
+    images: ['panneaux/almadies-shell-sens-almadies'],
     libreLe: null,
   },
   {
@@ -110,8 +115,8 @@ export const panneaux: Panneau[] = [
     vuesJour: 105_000,
     coords: null,
     mapsUrl: null,
-    video: null,
-    images: [],
+    video: 'almadies-shell-sens-aeroport',
+    images: ['panneaux/almadies-shell-sens-aeroport'],
     libreLe: null,
   },
   {
@@ -131,8 +136,8 @@ export const panneaux: Panneau[] = [
     vuesJour: 170_000,
     coords: null,
     mapsUrl: null,
-    video: null,
-    images: [],
+    video: 'entree-ville-abdou-diasse-sens-ville',
+    images: ['panneaux/entree-ville-abdou-diasse-sens-ville'],
     libreLe: null,
   },
   {
@@ -152,8 +157,8 @@ export const panneaux: Panneau[] = [
     vuesJour: 160_000,
     coords: null,
     mapsUrl: null,
-    video: null,
-    images: [],
+    video: 'entree-ville-abdou-diasse-sens-colobane',
+    images: ['panneaux/entree-ville-abdou-diasse-sens-colobane'],
     libreLe: null,
   },
   {
@@ -173,8 +178,8 @@ export const panneaux: Panneau[] = [
     vuesJour: 175_000,
     coords: null,
     mapsUrl: null,
-    video: null,
-    images: [],
+    video: 'autoroute-central-equipement-sens-dakar',
+    images: [], // À CONFIRMER : photos à demander au client
     libreLe: null,
   },
   {
@@ -194,8 +199,8 @@ export const panneaux: Panneau[] = [
     vuesJour: 170_000,
     coords: null,
     mapsUrl: null,
-    video: null,
-    images: [],
+    video: 'autoroute-central-equipement-face-rn1',
+    images: [], // À CONFIRMER : photos à demander au client
     libreLe: null,
   },
   {
@@ -215,8 +220,8 @@ export const panneaux: Panneau[] = [
     vuesJour: 190_000,
     coords: null,
     mapsUrl: null,
-    video: null,
-    images: [],
+    video: 'pikine-arene-nationale',
+    images: ['panneaux/pikine-arene-nationale', 'panneaux/pikine-arene-nationale-2'],
     libreLe: null,
   },
   {
@@ -236,8 +241,8 @@ export const panneaux: Panneau[] = [
     vuesJour: 135_000,
     coords: null,
     mapsUrl: null,
-    video: null,
-    images: [],
+    video: 'aeroport-aibd',
+    images: ['panneaux/aeroport-aibd', 'panneaux/aeroport-aibd-2', 'panneaux/aeroport-aibd-3'],
     libreLe: null,
   },
   {
@@ -257,8 +262,8 @@ export const panneaux: Panneau[] = [
     vuesJour: 125_000,
     coords: null,
     mapsUrl: null,
-    video: null,
-    images: [],
+    video: 'route-rufisque-cotoa',
+    images: ['panneaux/route-rufisque-cotoa', 'panneaux/route-rufisque-cotoa-2', 'panneaux/route-rufisque-cotoa-3'],
     libreLe: null,
   },
   {
@@ -279,7 +284,7 @@ export const panneaux: Panneau[] = [
     coords: null,
     mapsUrl: null,
     video: null,
-    images: [],
+    images: ['panneaux/corniche-ouest-sens-soumbedioune'],
     libreLe: '2026-07-31',
   },
   {
@@ -300,7 +305,7 @@ export const panneaux: Panneau[] = [
     coords: null,
     mapsUrl: null,
     video: null,
-    images: [],
+    images: ['panneaux/soumbedioune-sortie-tunnel'],
     libreLe: '2026-10-31',
   },
   {
@@ -321,7 +326,7 @@ export const panneaux: Panneau[] = [
     coords: null,
     mapsUrl: null,
     video: null,
-    images: [],
+    images: ['panneaux/plateau-mairie', 'panneaux/plateau-mairie-2'],
     libreLe: '2026-12-31',
   },
   {
@@ -342,7 +347,7 @@ export const panneaux: Panneau[] = [
     coords: null,
     mapsUrl: null,
     video: null,
-    images: [],
+    images: ['panneaux/colobane'],
     libreLe: '2026-12-31',
   },
   {
@@ -362,8 +367,8 @@ export const panneaux: Panneau[] = [
     vuesJour: 185_000,
     coords: null,
     mapsUrl: null,
-    video: null,
-    images: [],
+    video: 'peage-sedima-sens-aibd',
+    images: ['panneaux/peage-sedima-sens-aibd'],
     libreLe: '2026-12-31',
   },
   {
@@ -383,8 +388,8 @@ export const panneaux: Panneau[] = [
     vuesJour: 180_000,
     coords: null,
     mapsUrl: null,
-    video: null,
-    images: [],
+    video: 'peage-sedima-sens-dakar',
+    images: ['panneaux/peage-sedima-sens-dakar'],
     libreLe: '2026-12-31',
   },
   {
@@ -405,7 +410,7 @@ export const panneaux: Panneau[] = [
     coords: null,
     mapsUrl: null,
     video: null,
-    images: [],
+    images: ['panneaux/mariste-sens-dakar'],
     libreLe: '2026-12-31',
   },
   {
@@ -426,7 +431,7 @@ export const panneaux: Panneau[] = [
     coords: null,
     mapsUrl: null,
     video: null,
-    images: [],
+    images: ['panneaux/mariste-sens-emg'],
     libreLe: '2027-01-19',
   },
   {
@@ -447,7 +452,7 @@ export const panneaux: Panneau[] = [
     coords: null,
     mapsUrl: null,
     video: null,
-    images: [],
+    images: ['panneaux/ouest-foire-echangeur', 'panneaux/ouest-foire-echangeur-2', 'panneaux/ouest-foire-echangeur-3'],
     libreLe: '2027-01-31',
   },
   {
@@ -468,7 +473,7 @@ export const panneaux: Panneau[] = [
     coords: null,
     mapsUrl: null,
     video: null,
-    images: [],
+    images: ['panneaux/plateau-place-independance'],
     libreLe: '2027-03-31',
   },
   {
@@ -489,7 +494,7 @@ export const panneaux: Panneau[] = [
     coords: null,
     mapsUrl: null,
     video: null,
-    images: [],
+    images: ['panneaux/peage-thiaroye-sens-dakar'],
     libreLe: '2027-04-06',
   },
   {
@@ -510,7 +515,7 @@ export const panneaux: Panneau[] = [
     coords: null,
     mapsUrl: null,
     video: null,
-    images: [],
+    images: ['panneaux/peage-thiaroye-sens-aibd'],
     libreLe: '2027-04-06',
   },
   {
@@ -531,7 +536,7 @@ export const panneaux: Panneau[] = [
     coords: null,
     mapsUrl: null,
     video: null,
-    images: [],
+    images: [], // À CONFIRMER : photos à demander au client
     libreLe: '2027-05-31',
   },
   {
@@ -552,7 +557,7 @@ export const panneaux: Panneau[] = [
     coords: null,
     mapsUrl: null,
     video: null,
-    images: [],
+    images: ['panneaux/plateau-entree-ville'],
     libreLe: '2027-06-30',
   },
 

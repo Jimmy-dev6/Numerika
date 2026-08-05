@@ -136,6 +136,10 @@ const nextConfig = {
 
   skipTrailingSlashRedirect: true,
 
+  /* Tentative étape 15 bis : experimental.optimizeCss (critters) pour
+     inliner le CSS critique — SANS EFFET en App Router sur Next 14.2
+     (vérifié : 0 <style> dans les HTML prérendus). Retiré. */
+
   async redirects() {
     return [
       ...redirectionsSimples.flatMap(([source, destination]) => paire(source, destination)),

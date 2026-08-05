@@ -34,7 +34,7 @@ export function WhatsAppCTA({
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        'inline-flex items-center gap-2 rounded-btn border border-line px-4 py-2 text-sm font-medium transition-colors hover:border-fg',
+        'bouton-vif inline-flex items-center gap-2 rounded-btn border border-line px-4 py-2 text-sm font-medium transition-colors hover:border-fg',
         className
       )}
     >

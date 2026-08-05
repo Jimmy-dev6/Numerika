@@ -25,7 +25,7 @@ export function Header({ locale }: { locale: Locale }) {
               <li key={item.href}>
                 <Link
                   href={`/${locale}${item.href}`}
-                  className="text-fg-soft transition-colors hover:text-fg"
+                  className="lien-nav text-fg-soft transition-colors hover:text-fg"
                 >
                   {item.label[locale]}
                 </Link>
@@ -37,7 +37,7 @@ export function Header({ locale }: { locale: Locale }) {
         <div className="flex items-center gap-3">
           <Link
             href={`/${locale}${site.devis.href}`}
-            className="rounded-btn bg-fg px-4 py-2 text-sm font-medium text-bg transition-opacity hover:opacity-85"
+            className="bouton-vif rounded-btn bg-fg px-4 py-2 text-sm font-medium text-bg transition-opacity hover:opacity-85"
           >
             {site.devis.label[locale]}
           </Link>

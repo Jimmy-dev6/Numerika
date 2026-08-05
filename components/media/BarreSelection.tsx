@@ -34,8 +34,10 @@ export function BarreSelection({ locale }: { locale: Locale }) {
   return (
     /* Rendu nul à sélection vide (plus haut) ; safe-area pour les écrans
        à encoche (validation étape 4). */
+    /* barre-entree (passe B) : montée du bas amortie à la première coche
+       — la barre n'existe pas avant. Overlay fixe : zéro CLS. */
     <div
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-surface"
+      className="barre-entree fixed inset-x-0 bottom-0 z-50 border-t border-line bg-surface"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="mx-auto flex max-w-grid flex-wrap items-center gap-x-4 gap-y-2 px-6 py-3">
@@ -49,7 +51,7 @@ export function BarreSelection({ locale }: { locale: Locale }) {
         />
         <Link
           href={`/${locale}/devis?panneaux=${slugs.join(',')}`}
-          className="rounded-btn bg-fg px-4 py-2 text-sm font-medium text-bg transition-opacity hover:opacity-85"
+          className="bouton-vif rounded-btn bg-fg px-4 py-2 text-sm font-medium text-bg transition-opacity hover:opacity-85"
         >
           {media.selection.devisLabel[locale]}
         </Link>
